@@ -29,6 +29,40 @@ export async function fetchMyProfile(): Promise<Profile> {
   return data as Profile;
 }
 
+/** Update the camper's own display name and/or avatar photo. */
+export async function updateProfile(opts: {
+  displayName?: string;
+  avatarUri?: string | null;
+}): Promise<void> {
+  const userId = await requireUserId();
+  const patch: Record<string, unknown> = {};
+
+  if (opts.displayName !== undefined) patch.display_name = opts.displayName;
+
+  if (opts.avatarUri) {
+    const ext = opts.avatarUri.split(".").pop()?.split("?")[0] || "jpg";
+    const path = `${userId}/avatar.${ext}`;
+    const base64 = await FileSystem.readAsStringAsync(opts.avatarUri, { encoding: "base64" });
+    const { error: upErr } = await supabase.storage
+      .from("avatars")
+      .upload(path, decode(base64), { contentType: `image/${ext}`, upsert: true });
+    if (upErr) throw upErr;
+    patch.avatar_url = path;
+  }
+
+  if (Object.keys(patch).length === 0) return;
+  const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
+  if (error) throw error;
+}
+
+/** Resolve a stored avatar path into a displayable signed URL. */
+export async function resolveAvatarUrl(path: string | null): Promise<string | null> {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  const { data } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+  return data?.signedUrl ?? null;
+}
+
 export async function fetchCamp(id: string): Promise<Camp> {
   const { data, error } = await supabase.from("camps").select("*").eq("id", id).single();
   if (error) throw error;

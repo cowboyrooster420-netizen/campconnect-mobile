@@ -63,6 +63,17 @@ function RootNavigator() {
           headerShadowVisible: false,
         }}
       />
+      <Stack.Screen
+        name="edit-profile"
+        options={{
+          headerShown: true,
+          title: "Edit profile",
+          headerTintColor: theme.pine,
+          headerTitleStyle: { color: theme.ink },
+          headerStyle: { backgroundColor: theme.sand },
+          headerShadowVisible: false,
+        }}
+      />
     </Stack>
   );
 }

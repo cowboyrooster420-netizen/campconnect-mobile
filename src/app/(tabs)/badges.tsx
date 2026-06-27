@@ -13,8 +13,9 @@ import { fetchBadges } from "@/lib/data";
 import type { EarnedBadge } from "@/lib/types";
 import { theme } from "@/lib/theme";
 
-// Seed badges use SF Symbol names; map them to Ionicons (fallback: ribbon).
-const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+// Badge icons are either valid Ionicons names (challenge/signup badges) or the
+// old SF Symbol names from the original milestone badges. Resolve both.
+const SF_MAP: Record<string, keyof typeof Ionicons.glyphMap> = {
   "figure.walk": "walk",
   "mountain.2.fill": "triangle",
   "flame.fill": "flame",
@@ -22,7 +23,10 @@ const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   "crown.fill": "trophy",
   "star.fill": "star",
 };
-const iconFor = (name: string) => ICONS[name] ?? "ribbon";
+function iconFor(name: string): keyof typeof Ionicons.glyphMap {
+  if (name in Ionicons.glyphMap) return name as keyof typeof Ionicons.glyphMap;
+  return SF_MAP[name] ?? "ribbon";
+}
 
 export default function BadgesScreen() {
   const [badges, setBadges] = useState<EarnedBadge[]>([]);
