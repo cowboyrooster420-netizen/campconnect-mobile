@@ -53,7 +53,7 @@ export default function FeedScreen() {
           <Text style={styles.emptyMsg}>Your camp&apos;s videos and memories will show up here.</Text>
         </View>
       ) : (
-        entries.map((e) => <FeedCard key={e.id} entry={e} />)
+        entries.map((e, i) => <FeedCard key={e.id} entry={e} lead={i === 0} />)
       )}
     </ScrollView>
   );

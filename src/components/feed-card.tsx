@@ -5,59 +5,136 @@ import { useRouter } from "expo-router";
 import { FEED_TYPE_META, type FeedEntry } from "@/lib/types";
 import { theme } from "@/lib/theme";
 
-export default function FeedCard({ entry }: { entry: FeedEntry }) {
+export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; lead?: boolean }) {
   const router = useRouter();
   const meta = FEED_TYPE_META[entry.type];
   const player = useVideoPlayer(entry.videoUrl, (p) => {
     p.loop = false;
   });
 
-  const goToChallenge = entry.challengeId
-    ? () => router.push(`/challenge/${entry.challengeId}`)
-    : undefined;
+  // Announcements (and any media-less entry) render as a warm card.
+  if (!entry.videoUrl) {
+    return (
+      <View style={styles.note}>
+        <View style={styles.noteIcon}>
+          <Ionicons name="megaphone" size={23} color="#fff" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.noteEyebrow}>{meta.label.toUpperCase()}</Text>
+          <Text style={styles.noteTitle}>{entry.title}</Text>
+          {entry.caption ? <Text style={styles.noteBody}>{entry.caption}</Text> : null}
+        </View>
+      </View>
+    );
+  }
+
+  // Tap: challenge/wrap-up cards jump to the challenge; memory cards play inline.
+  const onPress = () => {
+    if (entry.challengeId) {
+      router.push(`/challenge/${entry.challengeId}`);
+      return;
+    }
+    if (player.playing) player.pause();
+    else player.play();
+  };
 
   return (
-    <View style={styles.card}>
-      <View style={styles.head}>
-        <Text style={styles.emoji}>{meta.emoji}</Text>
-        <Text style={styles.label}>{meta.label}</Text>
+    <Pressable style={[styles.card, { height: lead ? 420 : 300 }]} onPress={onPress}>
+      <VideoView
+        player={player}
+        style={StyleSheet.absoluteFill}
+        nativeControls={false}
+        contentFit="cover"
+      />
+      <View style={styles.play}>
+        <Ionicons name="play" size={lead ? 28 : 25} color="#fff" style={{ marginLeft: 3 }} />
       </View>
-
-      <Text style={styles.title}>{entry.title}</Text>
-      {entry.caption ? <Text style={styles.caption}>{entry.caption}</Text> : null}
-
-      {entry.videoUrl ? (
-        <VideoView player={player} style={styles.video} nativeControls contentFit="cover" />
-      ) : null}
-
-      {goToChallenge ? (
-        <Pressable style={styles.link} onPress={goToChallenge}>
-          <Text style={styles.linkText}>Go to challenge</Text>
-          <Ionicons name="chevron-forward" size={14} color={theme.pine} />
-        </Pressable>
-      ) : null}
-    </View>
+      <View style={styles.typeChip}>
+        <Text style={styles.emoji}>{meta.emoji}</Text>
+        <Text style={styles.typeText}>{meta.label}</Text>
+      </View>
+      <View style={styles.scrim}>
+        <Text style={styles.title}>{entry.title}</Text>
+        {entry.caption ? <Text style={styles.caption}>{entry.caption}</Text> : null}
+        {entry.challengeId ? (
+          <View style={styles.cta}>
+            <Text style={styles.ctaText}>Go to challenge</Text>
+            <Ionicons name="arrow-forward" size={15} color="#1f3a2e" />
+          </View>
+        ) : null}
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.white,
-    borderRadius: theme.cardRadius,
-    padding: 16,
-    gap: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
+  card: { borderRadius: 22, overflow: "hidden", backgroundColor: "#1f3a2e" },
+  play: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  head: { flexDirection: "row", alignItems: "center", gap: 6 },
-  emoji: { fontSize: 16 },
-  label: { fontSize: 12, fontWeight: "700", color: theme.muted, textTransform: "uppercase" },
-  title: { fontSize: 18, fontWeight: "800", color: theme.ink },
-  caption: { fontSize: 14, color: theme.muted, lineHeight: 20 },
-  video: { width: "100%", height: 200, borderRadius: 12, backgroundColor: "#000", marginTop: 4 },
-  link: { flexDirection: "row", alignItems: "center", gap: 3, marginTop: 2 },
-  linkText: { color: theme.pine, fontWeight: "700", fontSize: 14 },
+  typeChip: {
+    position: "absolute",
+    top: 14,
+    left: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(0,0,0,0.32)",
+    borderRadius: 999,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+  },
+  emoji: { fontSize: 13 },
+  typeText: { color: "#fff", fontSize: 11.5, fontWeight: "700" },
+  scrim: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 18,
+    paddingTop: 48,
+    paddingBottom: 18,
+    backgroundColor: "rgba(15,28,22,0.55)",
+  },
+  title: { fontSize: 22, fontWeight: "700", color: "#fff" },
+  caption: { fontSize: 13.5, color: "rgba(255,255,255,0.78)", marginTop: 5, lineHeight: 19 },
+  cta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    marginTop: 14,
+    backgroundColor: "#fff",
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+  },
+  ctaText: { color: "#1f3a2e", fontSize: 13.5, fontWeight: "700" },
+
+  note: {
+    flexDirection: "row",
+    gap: 14,
+    backgroundColor: "#FBF1E2",
+    borderWidth: 1,
+    borderColor: "#F0DCC0",
+    borderRadius: 20,
+    padding: 18,
+  },
+  noteIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 13,
+    backgroundColor: "#E08A3C",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noteEyebrow: { fontSize: 11.5, fontWeight: "700", color: "#C2722B", textTransform: "uppercase" },
+  noteTitle: { fontSize: 17, fontWeight: "700", color: theme.ink, marginTop: 2 },
+  noteBody: { fontSize: 13.5, color: theme.muted, marginTop: 3, lineHeight: 19 },
 });
