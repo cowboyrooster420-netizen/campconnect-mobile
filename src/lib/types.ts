@@ -22,6 +22,7 @@ export interface Profile {
   cabin: string | null;
   avatar_url: string | null;
   total_points: number;
+  created_at: string;
 }
 
 export interface ChallengeTemplate {
