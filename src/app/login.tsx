@@ -44,7 +44,7 @@ export default function LoginScreen() {
           <View style={styles.logo}>
             <Ionicons name="bonfire" size={36} color={theme.white} />
           </View>
-          <Text style={styles.title}>CampConnect</Text>
+          <Text style={styles.title}>Campfire</Text>
           <Text style={styles.subtitle}>Your camp, all year long.</Text>
         </View>
 
