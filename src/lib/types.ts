@@ -12,6 +12,7 @@ export interface Camp {
   slug: string;
   primary_color: string | null;
   season_year: number;
+  session_start_date: string | null;
 }
 
 export interface Profile {
