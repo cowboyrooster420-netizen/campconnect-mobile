@@ -123,7 +123,8 @@ export async function fetchFeed(): Promise<FeedEntry[]> {
       caption: i.caption,
       challengeId: i.season_challenge_id,
       publishAt: i.publish_at,
-      videoUrl: await resolveCounselorVideo(i.media_path),
+      mediaUrl: await resolveCounselorVideo(i.media_path),
+      mediaType: i.media_type,
     }))
   );
 }

@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useRouter } from "expo-router";
@@ -8,12 +8,13 @@ import { theme } from "@/lib/theme";
 export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; lead?: boolean }) {
   const router = useRouter();
   const meta = FEED_TYPE_META[entry.type];
-  const player = useVideoPlayer(entry.videoUrl, (p) => {
+  const isVideo = entry.mediaType === "video" && !!entry.mediaUrl;
+  const player = useVideoPlayer(isVideo ? entry.mediaUrl : null, (p) => {
     p.loop = false;
   });
 
-  // Announcements (and any media-less entry) render as a warm card.
-  if (!entry.videoUrl) {
+  // No media (e.g. a text announcement) → warm note card.
+  if (!entry.mediaUrl) {
     return (
       <View style={styles.note}>
         <View style={styles.noteIcon}>
@@ -28,27 +29,36 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
     );
   }
 
-  // Tap: challenge/wrap-up cards jump to the challenge; memory cards play inline.
+  // Tap: challenge-linked cards (challenge/wrap-up/nudge) jump to the challenge;
+  // a media-only card with video toggles playback.
   const onPress = () => {
     if (entry.challengeId) {
       router.push(`/challenge/${entry.challengeId}`);
       return;
     }
-    if (player.playing) player.pause();
-    else player.play();
+    if (isVideo) {
+      if (player.playing) player.pause();
+      else player.play();
+    }
   };
 
   return (
     <Pressable style={[styles.card, { height: lead ? 420 : 300 }]} onPress={onPress}>
-      <VideoView
-        player={player}
-        style={StyleSheet.absoluteFill}
-        nativeControls={false}
-        contentFit="cover"
-      />
-      <View style={styles.play}>
-        <Ionicons name="play" size={lead ? 28 : 25} color="#fff" style={{ marginLeft: 3 }} />
-      </View>
+      {isVideo ? (
+        <VideoView
+          player={player}
+          style={StyleSheet.absoluteFill}
+          nativeControls={false}
+          contentFit="cover"
+        />
+      ) : (
+        <Image source={{ uri: entry.mediaUrl! }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      )}
+      {isVideo ? (
+        <View style={styles.play}>
+          <Ionicons name="play" size={lead ? 28 : 25} color="#fff" style={{ marginLeft: 3 }} />
+        </View>
+      ) : null}
       <View style={styles.typeChip}>
         <Text style={styles.emoji}>{meta.emoji}</Text>
         <Text style={styles.typeText}>{meta.label}</Text>

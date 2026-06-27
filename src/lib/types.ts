@@ -49,7 +49,8 @@ export interface SeasonChallenge {
   template: ChallengeTemplate;
 }
 
-export type FeedItemType = "challenge" | "wrap_up" | "memory" | "announcement";
+export type FeedItemType = "challenge" | "wrap_up" | "nudge" | "memory" | "announcement";
+export type MediaType = "photo" | "video";
 
 export interface FeedItem {
   id: string;
@@ -58,17 +59,19 @@ export interface FeedItem {
   title: string;
   caption: string | null;
   media_path: string | null;
+  media_type: MediaType | null;
   season_challenge_id: string | null;
   publish_at: string;
 }
 
-/** A resolved feed entry ready for the UI (signed/playable video URL). */
+/** A resolved feed entry ready for the UI (signed/playable media URL). */
 export interface FeedEntry {
   id: string;
   type: FeedItemType;
   title: string;
   caption: string | null;
-  videoUrl: string | null;
+  mediaUrl: string | null;
+  mediaType: MediaType | null;
   challengeId: string | null;
   publishAt: string;
 }
@@ -76,6 +79,7 @@ export interface FeedEntry {
 export const FEED_TYPE_META: Record<FeedItemType, { label: string; emoji: string }> = {
   challenge: { label: "New challenge", emoji: "🎬" },
   wrap_up: { label: "Wrap-up", emoji: "🏁" },
+  nudge: { label: "Counselor nudge", emoji: "👋" },
   memory: { label: "Camp memory", emoji: "📼" },
   announcement: { label: "Announcement", emoji: "📣" },
 };
