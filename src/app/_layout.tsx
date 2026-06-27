@@ -1,15 +1,68 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { Stack, useRouter, useSegments } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { SessionProvider, useSession } from "@/context/auth";
+import { theme } from "@/lib/theme";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <SessionProvider>
+        <StatusBar style="dark" />
+        <RootNavigator />
+      </SessionProvider>
+    </SafeAreaProvider>
+  );
+}
+
+function RootNavigator() {
+  const { session, loading } = useSession();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+    const inLogin = segments[0] === "login";
+    if (!session && !inLogin) router.replace("/login");
+    else if (session && inLogin) router.replace("/");
+  }, [session, loading, segments, router]);
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: theme.sand,
+        }}
+      >
+        <ActivityIndicator color={theme.pine} size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.sand },
+      }}
+    >
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="login" />
+      <Stack.Screen
+        name="challenge/[id]"
+        options={{
+          headerShown: true,
+          title: "",
+          headerTintColor: theme.pine,
+          headerStyle: { backgroundColor: theme.sand },
+          headerShadowVisible: false,
+        }}
+      />
+    </Stack>
   );
 }
