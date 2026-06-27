@@ -5,11 +5,23 @@ import type {
   Badge,
   Camp,
   EarnedBadge,
+  FeedEntry,
+  FeedItem,
   Profile,
   SeasonChallenge,
   Submission,
   SubmissionFormat,
 } from "./types";
+
+/** Resolve a counselor-videos value (storage path or external URL) into a playable URL. */
+async function resolveCounselorVideo(value: string | null): Promise<string | null> {
+  if (!value) return null;
+  if (value.startsWith("http")) return value;
+  const { data } = await supabase.storage
+    .from("counselor-videos")
+    .createSignedUrl(value, 60 * 60);
+  return data?.signedUrl ?? null;
+}
 
 async function requireUserId(): Promise<string> {
   const { data } = await supabase.auth.getSession();
@@ -93,7 +105,30 @@ export async function fetchActiveChallenges(): Promise<SeasonChallenge[]> {
   return challenges;
 }
 
-/** A single challenge by id, with its counselor video resolved to a playable URL. */
+/** The camp feed (operator-curated channel), newest first, with playable video URLs. */
+export async function fetchFeed(): Promise<FeedEntry[]> {
+  const { data, error } = await supabase
+    .from("feed_items")
+    .select("*")
+    .lte("publish_at", new Date().toISOString())
+    .order("publish_at", { ascending: false });
+  if (error) throw error;
+
+  const items = (data as FeedItem[]) ?? [];
+  return Promise.all(
+    items.map(async (i) => ({
+      id: i.id,
+      type: i.type,
+      title: i.title,
+      caption: i.caption,
+      challengeId: i.season_challenge_id,
+      publishAt: i.publish_at,
+      videoUrl: await resolveCounselorVideo(i.media_path),
+    }))
+  );
+}
+
+/** A single challenge by id, with intro + wrap-up videos resolved to playable URLs. */
 export async function fetchChallengeById(id: string): Promise<SeasonChallenge> {
   const { data, error } = await supabase
     .from("season_challenges")
@@ -103,12 +138,8 @@ export async function fetchChallengeById(id: string): Promise<SeasonChallenge> {
   if (error) throw error;
 
   const c = data as SeasonChallenge;
-  if (c.counselor_video_url && !c.counselor_video_url.startsWith("http")) {
-    const { data: signed } = await supabase.storage
-      .from("counselor-videos")
-      .createSignedUrl(c.counselor_video_url, 60 * 60);
-    c.counselor_video_url = signed?.signedUrl ?? null;
-  }
+  c.counselor_video_url = await resolveCounselorVideo(c.counselor_video_url);
+  c.recap_video_url = await resolveCounselorVideo(c.recap_video_url);
   return c;
 }
 

@@ -30,6 +30,7 @@ export default function ChallengeDetailScreen() {
   const [challenge, setChallenge] = useState<SeasonChallenge | null>(null);
   const [existing, setExisting] = useState<Submission | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [recapUrl, setRecapUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Submission state
@@ -40,6 +41,9 @@ export default function ChallengeDetailScreen() {
   const player = useVideoPlayer(videoUrl, (p) => {
     p.loop = false;
   });
+  const recapPlayer = useVideoPlayer(recapUrl, (p) => {
+    p.loop = false;
+  });
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -48,6 +52,7 @@ export default function ChallengeDetailScreen() {
       setChallenge(c);
       setExisting(sub);
       setVideoUrl(c.counselor_video_url);
+      setRecapUrl(c.recap_video_url);
     } catch {
       // ignore
     } finally {
@@ -126,6 +131,16 @@ export default function ChallengeDetailScreen() {
       <Section icon="clipboard" title="Your challenge">
         <Text style={styles.body}>{t.instructions}</Text>
       </Section>
+
+      {recapUrl ? (
+        <View style={styles.section}>
+          <View style={styles.sectionHead}>
+            <Ionicons name="flag" size={18} color={theme.sunset} />
+            <Text style={[styles.sectionTitle, { color: theme.sunset }]}>Challenge Wrap-up</Text>
+          </View>
+          <VideoView player={recapPlayer} style={styles.video} nativeControls contentFit="cover" />
+        </View>
+      ) : null}
 
       {/* Submission area */}
       {alreadyDone ? (
