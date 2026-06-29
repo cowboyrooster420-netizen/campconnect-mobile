@@ -13,26 +13,7 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
     p.loop = false;
   });
 
-  // No media, but linked to a challenge (e.g. released without an intro video)
-  // → a tappable prompt card that jumps to the challenge.
-  if (!entry.mediaUrl && entry.challengeId) {
-    return (
-      <Pressable
-        style={styles.prompt}
-        onPress={() => router.push(`/challenge/${entry.challengeId}`)}
-      >
-        <Text style={styles.promptEmoji}>{meta.emoji}</Text>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.promptEyebrow}>{meta.label.toUpperCase()}</Text>
-          <Text style={styles.promptTitle}>{entry.title}</Text>
-          {entry.caption ? <Text style={styles.promptBody}>{entry.caption}</Text> : null}
-        </View>
-        <Ionicons name="chevron-forward" size={18} color={theme.pine} />
-      </Pressable>
-    );
-  }
-
-  // No media + no link (a text announcement) → warm note card.
+  // No media (a text announcement) → warm note card.
   if (!entry.mediaUrl) {
     return (
       <View style={styles.note}>
@@ -146,25 +127,6 @@ const styles = StyleSheet.create({
   },
   ctaText: { color: "#1f3a2e", fontSize: 13.5, fontWeight: "700" },
 
-  prompt: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    backgroundColor: theme.white,
-    borderLeftWidth: 4,
-    borderLeftColor: theme.pine,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
-  },
-  promptEmoji: { fontSize: 26 },
-  promptEyebrow: { fontSize: 11.5, fontWeight: "700", color: theme.pine, textTransform: "uppercase" },
-  promptTitle: { fontSize: 17, fontWeight: "800", color: theme.ink, marginTop: 2 },
-  promptBody: { fontSize: 13.5, color: theme.muted, marginTop: 2 },
   note: {
     flexDirection: "row",
     gap: 14,
