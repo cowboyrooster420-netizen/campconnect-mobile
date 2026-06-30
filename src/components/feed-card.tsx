@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useRouter } from "expo-router";
 import { FEED_TYPE_META, type FeedEntry } from "@/lib/types";
+import SceneBackground from "@/components/scene-background";
 import { theme } from "@/lib/theme";
 
 export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; lead?: boolean }) {
@@ -25,6 +26,7 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
     };
     return (
       <Pressable style={[styles.card, { height: lead ? 420 : 300 }]} onPress={onPress}>
+        <SceneBackground seed={entry.id} />
         <VideoView player={player} style={StyleSheet.absoluteFill} nativeControls={false} contentFit="cover" />
         <View style={styles.play}>
           <Ionicons name="play" size={lead ? 28 : 25} color="#fff" style={{ marginLeft: 3 }} />
@@ -53,7 +55,9 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
     <Pressable style={styles.annCard} onPress={openAction}>
       {entry.mediaUrl ? (
         <ImageBackground source={{ uri: entry.mediaUrl }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-      ) : null}
+      ) : (
+        <SceneBackground seed={entry.id} />
+      )}
       <View style={styles.topScrim} />
       {entry.badge ? (
         <View style={styles.badge}>
