@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ImageBackground, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useRouter } from "expo-router";
@@ -13,62 +13,59 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
     p.loop = false;
   });
 
-  // No media (a text announcement) → warm note card.
-  if (!entry.mediaUrl) {
-    return (
-      <View style={styles.note}>
-        <View style={styles.noteIcon}>
-          <Ionicons name="megaphone" size={23} color="#fff" />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.noteEyebrow}>{meta.label.toUpperCase()}</Text>
-          <Text style={styles.noteTitle}>{entry.title}</Text>
-          {entry.caption ? <Text style={styles.noteBody}>{entry.caption}</Text> : null}
-        </View>
-      </View>
-    );
-  }
-
-  // Tap: challenge-linked cards (challenge/wrap-up/nudge) jump to the challenge;
-  // a media-only card with video toggles playback.
-  const onPress = () => {
-    if (entry.challengeId) {
-      router.push(`/challenge/${entry.challengeId}`);
-      return;
-    }
-    if (isVideo) {
+  // ---- Video entry (challenge / nudge / wrap-up) ----
+  if (isVideo) {
+    const onPress = () => {
+      if (entry.challengeId) {
+        router.push(`/challenge/${entry.challengeId}`);
+        return;
+      }
       if (player.playing) player.pause();
       else player.play();
-    }
-  };
-
-  return (
-    <Pressable style={[styles.card, { height: lead ? 420 : 300 }]} onPress={onPress}>
-      {isVideo ? (
-        <VideoView
-          player={player}
-          style={StyleSheet.absoluteFill}
-          nativeControls={false}
-          contentFit="cover"
-        />
-      ) : (
-        <Image source={{ uri: entry.mediaUrl! }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-      )}
-      {isVideo ? (
+    };
+    return (
+      <Pressable style={[styles.card, { height: lead ? 420 : 300 }]} onPress={onPress}>
+        <VideoView player={player} style={StyleSheet.absoluteFill} nativeControls={false} contentFit="cover" />
         <View style={styles.play}>
           <Ionicons name="play" size={lead ? 28 : 25} color="#fff" style={{ marginLeft: 3 }} />
         </View>
+        <View style={styles.typeChip}>
+          <Text style={styles.emoji}>{meta.emoji}</Text>
+          <Text style={styles.typeText}>{meta.label}</Text>
+        </View>
+        <View style={styles.scrim}>
+          <Text style={styles.title}>{entry.title}</Text>
+          {entry.caption ? <Text style={styles.caption}>{entry.caption}</Text> : null}
+          {entry.challengeId ? (
+            <View style={styles.cta}>
+              <Text style={styles.ctaText}>Go to challenge</Text>
+              <Ionicons name="arrow-forward" size={15} color="#1f3a2e" />
+            </View>
+          ) : null}
+        </View>
+      </Pressable>
+    );
+  }
+
+  // ---- Announcement (immersive cover-photo card) ----
+  const openAction = entry.actionUrl ? () => Linking.openURL(entry.actionUrl!) : undefined;
+  return (
+    <Pressable style={styles.annCard} onPress={openAction}>
+      {entry.mediaUrl ? (
+        <ImageBackground source={{ uri: entry.mediaUrl }} style={StyleSheet.absoluteFill} resizeMode="cover" />
       ) : null}
-      <View style={styles.typeChip}>
-        <Text style={styles.emoji}>{meta.emoji}</Text>
-        <Text style={styles.typeText}>{meta.label}</Text>
-      </View>
-      <View style={styles.scrim}>
+      <View style={styles.topScrim} />
+      {entry.badge ? (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{entry.badge}</Text>
+        </View>
+      ) : null}
+      <View style={styles.annScrim}>
         <Text style={styles.title}>{entry.title}</Text>
         {entry.caption ? <Text style={styles.caption}>{entry.caption}</Text> : null}
-        {entry.challengeId ? (
+        {entry.actionLabel ? (
           <View style={styles.cta}>
-            <Text style={styles.ctaText}>Go to challenge</Text>
+            <Text style={styles.ctaText}>{entry.actionLabel}</Text>
             <Ionicons name="arrow-forward" size={15} color="#1f3a2e" />
           </View>
         ) : null}
@@ -79,15 +76,7 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
 
 const styles = StyleSheet.create({
   card: { borderRadius: 22, overflow: "hidden", backgroundColor: "#1f3a2e" },
-  play: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  play: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, alignItems: "center", justifyContent: "center" },
   typeChip: {
     position: "absolute",
     top: 14,
@@ -112,8 +101,8 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     backgroundColor: "rgba(15,28,22,0.55)",
   },
-  title: { fontSize: 22, fontWeight: "700", color: "#fff" },
-  caption: { fontSize: 13.5, color: "rgba(255,255,255,0.78)", marginTop: 5, lineHeight: 19 },
+  title: { fontSize: 21, fontWeight: "700", color: "#fff" },
+  caption: { fontSize: 13.5, color: "rgba(255,255,255,0.82)", marginTop: 5, lineHeight: 19 },
   cta: {
     flexDirection: "row",
     alignItems: "center",
@@ -127,24 +116,27 @@ const styles = StyleSheet.create({
   },
   ctaText: { color: "#1f3a2e", fontSize: 13.5, fontWeight: "700" },
 
-  note: {
-    flexDirection: "row",
-    gap: 14,
-    backgroundColor: "#FBF1E2",
-    borderWidth: 1,
-    borderColor: "#F0DCC0",
-    borderRadius: 20,
-    padding: 18,
+  // Announcement
+  annCard: { height: 286, borderRadius: 22, overflow: "hidden", backgroundColor: "#34405C" },
+  topScrim: { position: "absolute", top: 0, left: 0, right: 0, height: 80, backgroundColor: "rgba(20,20,40,0.34)" },
+  badge: {
+    position: "absolute",
+    top: 14,
+    left: 14,
+    backgroundColor: "rgba(0,0,0,0.34)",
+    borderRadius: 999,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
   },
-  noteIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 13,
-    backgroundColor: "#E08A3C",
-    alignItems: "center",
-    justifyContent: "center",
+  badgeText: { color: "#fff", fontSize: 10.5, fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase" },
+  annScrim: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 18,
+    paddingTop: 46,
+    paddingBottom: 18,
+    backgroundColor: "rgba(18,18,36,0.82)",
   },
-  noteEyebrow: { fontSize: 11.5, fontWeight: "700", color: "#C2722B", textTransform: "uppercase" },
-  noteTitle: { fontSize: 17, fontWeight: "700", color: theme.ink, marginTop: 2 },
-  noteBody: { fontSize: 13.5, color: theme.muted, marginTop: 3, lineHeight: 19 },
 });

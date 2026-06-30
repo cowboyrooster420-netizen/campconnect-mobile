@@ -62,6 +62,9 @@ export interface FeedItem {
   media_path: string | null;
   media_type: MediaType | null;
   season_challenge_id: string | null;
+  badge_label: string | null;
+  action_label: string | null;
+  action_url: string | null;
   publish_at: string;
 }
 
@@ -74,6 +77,9 @@ export interface FeedEntry {
   mediaUrl: string | null;
   mediaType: MediaType | null;
   challengeId: string | null;
+  badge: string | null;
+  actionLabel: string | null;
+  actionUrl: string | null;
   publishAt: string;
 }
 
