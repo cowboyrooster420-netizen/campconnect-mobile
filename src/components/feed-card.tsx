@@ -1,4 +1,12 @@
-import { ImageBackground, Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ImageBackground,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -9,6 +17,9 @@ import { theme } from "@/lib/theme";
 
 export default function FeedCard({ entry }: { entry: FeedEntry }) {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  // Reel-sized (9:16) video cards, computed from the card's actual width.
+  const reelHeight = Math.round((width - theme.screenPad * 2) * (16 / 9));
   const meta = FEED_TYPE_META[entry.type];
   const isVideo = entry.mediaType === "video" && !!entry.mediaUrl;
   const player = useVideoPlayer(isVideo ? entry.mediaUrl : null, (p) => {
@@ -26,7 +37,7 @@ export default function FeedCard({ entry }: { entry: FeedEntry }) {
       else player.play();
     };
     return (
-      <Pressable style={styles.card} onPress={onPress}>
+      <Pressable style={[styles.card, { height: reelHeight }]} onPress={onPress}>
         <SceneBackground seed={entry.id} />
         <VideoView player={player} style={StyleSheet.absoluteFill} nativeControls={false} contentFit="cover" />
         <View style={styles.playWrap}>
@@ -82,7 +93,7 @@ export default function FeedCard({ entry }: { entry: FeedEntry }) {
 }
 
 const styles = StyleSheet.create({
-  card: { aspectRatio: 9 / 16, borderRadius: 22, overflow: "hidden", backgroundColor: "#1f3a2e" },
+  card: { borderRadius: 22, overflow: "hidden", backgroundColor: "#1f3a2e" },
   playWrap: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, alignItems: "center", justifyContent: "center" },
   playCircle: {
     width: 66,
