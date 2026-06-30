@@ -56,6 +56,9 @@ const dusk: Scene = (uid) => (
   </>
 );
 
+export type SceneName = "sunrise" | "lake" | "dusk";
+
+const BY_NAME: Record<SceneName, Scene> = { sunrise, lake, dusk };
 const SCENES: Scene[] = [sunrise, lake, dusk];
 
 function pick(seed: string): Scene {
@@ -64,12 +67,13 @@ function pick(seed: string): Scene {
   return SCENES[h % SCENES.length];
 }
 
-export default function SceneBackground({ seed = "" }: { seed?: string }) {
+/** Render a chosen `scene`, else a deterministic one from `seed`. */
+export default function SceneBackground({ seed = "", scene }: { seed?: string; scene?: string | null }) {
   const uid = useId().replace(/:/g, "");
-  const scene = pick(seed);
+  const render = scene && scene in BY_NAME ? BY_NAME[scene as SceneName] : pick(seed);
   return (
     <Svg style={StyleSheet.absoluteFill} viewBox="0 0 400 286" preserveAspectRatio="xMidYMid slice">
-      {scene(uid)}
+      {render(uid)}
     </Svg>
   );
 }

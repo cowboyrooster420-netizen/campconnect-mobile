@@ -125,6 +125,7 @@ export async function fetchFeed(): Promise<FeedEntry[]> {
       badge: i.badge_label,
       actionLabel: i.action_label,
       actionUrl: i.action_url,
+      scene: i.scene,
       publishAt: i.publish_at,
       mediaUrl: await resolveCounselorVideo(i.media_path),
       mediaType: i.media_type,

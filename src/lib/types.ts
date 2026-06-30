@@ -65,6 +65,7 @@ export interface FeedItem {
   badge_label: string | null;
   action_label: string | null;
   action_url: string | null;
+  scene: string | null;
   publish_at: string;
 }
 
@@ -80,6 +81,7 @@ export interface FeedEntry {
   badge: string | null;
   actionLabel: string | null;
   actionUrl: string | null;
+  scene: string | null;
   publishAt: string;
 }
 

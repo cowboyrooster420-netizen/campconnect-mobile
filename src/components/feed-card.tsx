@@ -56,7 +56,7 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
       {entry.mediaUrl ? (
         <ImageBackground source={{ uri: entry.mediaUrl }} style={StyleSheet.absoluteFill} resizeMode="cover" />
       ) : (
-        <SceneBackground seed={entry.id} />
+        <SceneBackground seed={entry.id} scene={entry.scene} />
       )}
       <View style={styles.topScrim} />
       {entry.badge ? (
