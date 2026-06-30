@@ -17,9 +17,12 @@ import { theme } from "@/lib/theme";
 
 export default function FeedCard({ entry }: { entry: FeedEntry }) {
   const router = useRouter();
-  const { width } = useWindowDimensions();
-  // Reel-sized (9:16) video cards, computed from the card's actual width.
-  const reelHeight = Math.round((width - theme.screenPad * 2) * (16 / 9));
+  const { width, height } = useWindowDimensions();
+  // Reel-ish video cards — tall portrait, but capped so the next card peeks.
+  const reelHeight = Math.min(
+    Math.round((width - theme.screenPad * 2) * 1.5),
+    Math.round(height * 0.6)
+  );
   const meta = FEED_TYPE_META[entry.type];
   const isVideo = entry.mediaType === "video" && !!entry.mediaUrl;
   const player = useVideoPlayer(isVideo ? entry.mediaUrl : null, (p) => {
@@ -49,7 +52,11 @@ export default function FeedCard({ entry }: { entry: FeedEntry }) {
           <Text style={styles.emoji}>{meta.emoji}</Text>
           <Text style={styles.typeText}>{meta.label}</Text>
         </View>
-        <LinearGradient colors={["transparent", "rgba(15,28,22,0.92)"]} style={styles.scrim}>
+        <LinearGradient
+          colors={["transparent", "rgba(12,22,17,0.78)", "rgba(12,22,17,0.97)"]}
+          locations={[0, 0.45, 1]}
+          style={styles.scrim}
+        >
           <Text style={styles.title}>{entry.title}</Text>
           {entry.caption ? <Text style={styles.caption}>{entry.caption}</Text> : null}
           {entry.challengeId ? (
@@ -125,7 +132,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: 18,
-    paddingTop: 72,
+    paddingTop: 100,
     paddingBottom: 18,
   },
   title: { fontSize: 21, fontWeight: "700", color: "#fff" },
