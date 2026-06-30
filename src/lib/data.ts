@@ -148,6 +148,19 @@ export async function fetchChallengeById(id: string): Promise<SeasonChallenge> {
   return c;
 }
 
+/** The patch (badge) a challenge awards, by its template. */
+export async function fetchChallengeBadge(
+  templateId: string
+): Promise<{ name: string; icon: string } | null> {
+  const { data } = await supabase
+    .from("badges")
+    .select("name, icon")
+    .eq("criteria->>type", "challenge")
+    .eq("criteria->>template_id", templateId)
+    .maybeSingle();
+  return (data as { name: string; icon: string }) ?? null;
+}
+
 /** The current camper's submission for one challenge, if any. */
 export async function fetchSubmissionFor(challengeId: string): Promise<Submission | null> {
   const userId = await requireUserId();

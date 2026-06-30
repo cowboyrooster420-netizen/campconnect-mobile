@@ -15,6 +15,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import * as ImagePicker from "expo-image-picker";
 import {
+  fetchChallengeBadge,
   fetchChallengeById,
   fetchSubmissionFor,
   submitChallenge,
@@ -31,6 +32,7 @@ export default function ChallengeDetailScreen() {
   const [existing, setExisting] = useState<Submission | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [recapUrl, setRecapUrl] = useState<string | null>(null);
+  const [badgeName, setBadgeName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Submission state
@@ -53,6 +55,7 @@ export default function ChallengeDetailScreen() {
       setExisting(sub);
       setVideoUrl(c.counselor_video_url);
       setRecapUrl(c.recap_video_url);
+      setBadgeName((await fetchChallengeBadge(c.template_id))?.name ?? null);
     } catch {
       // ignore
     } finally {
@@ -119,10 +122,18 @@ export default function ChallengeDetailScreen() {
 
       <View style={styles.titleRow}>
         <CategoryChip category={t.category} />
-        <Text style={styles.points}>{t.points} pts</Text>
       </View>
       <Text style={styles.title}>{t.title}</Text>
       <Text style={styles.summary}>{t.summary}</Text>
+
+      {badgeName ? (
+        <View style={styles.reward}>
+          <Ionicons name="ribbon" size={16} color={theme.sunset} />
+          <Text style={styles.rewardText}>
+            Earn the <Text style={styles.rewardName}>{badgeName}</Text> patch
+          </Text>
+        </View>
+      ) : null}
 
       <Section icon="chatbubble-ellipses" title="From your counselor">
         <Text style={styles.script}>{t.counselor_script}</Text>
@@ -237,9 +248,20 @@ const styles = StyleSheet.create({
   },
   placeholderText: { color: theme.muted, fontSize: 14 },
   titleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  points: { fontSize: 15, fontWeight: "800", color: theme.pine },
   title: { fontSize: 26, fontWeight: "800", color: theme.ink },
   summary: { fontSize: 15, color: theme.muted, lineHeight: 21, marginTop: -8 },
+  reward: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    alignSelf: "flex-start",
+    backgroundColor: theme.sunset + "1F",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  rewardText: { fontSize: 14, color: theme.ink, fontWeight: "600" },
+  rewardName: { fontWeight: "800", color: "#C2722B" },
   section: { backgroundColor: theme.white, borderRadius: theme.cardRadius, padding: 16, gap: 10 },
   sectionHead: { flexDirection: "row", alignItems: "center", gap: 8 },
   sectionTitle: { fontSize: 16, fontWeight: "800", color: theme.pine },
