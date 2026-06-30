@@ -7,7 +7,7 @@ import { FEED_TYPE_META, type FeedEntry } from "@/lib/types";
 import SceneBackground from "@/components/scene-background";
 import { theme } from "@/lib/theme";
 
-export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; lead?: boolean }) {
+export default function FeedCard({ entry }: { entry: FeedEntry }) {
   const router = useRouter();
   const meta = FEED_TYPE_META[entry.type];
   const isVideo = entry.mediaType === "video" && !!entry.mediaUrl;
@@ -26,11 +26,13 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
       else player.play();
     };
     return (
-      <Pressable style={[styles.card, { height: lead ? 420 : 300 }]} onPress={onPress}>
+      <Pressable style={styles.card} onPress={onPress}>
         <SceneBackground seed={entry.id} />
         <VideoView player={player} style={StyleSheet.absoluteFill} nativeControls={false} contentFit="cover" />
-        <View style={styles.play}>
-          <Ionicons name="play" size={lead ? 28 : 25} color="#fff" style={{ marginLeft: 3 }} />
+        <View style={styles.playWrap}>
+          <View style={styles.playCircle}>
+            <Ionicons name="play" size={30} color="#fff" style={{ marginLeft: 4 }} />
+          </View>
         </View>
         <View style={styles.typeChip}>
           <Text style={styles.emoji}>{meta.emoji}</Text>
@@ -80,8 +82,18 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 22, overflow: "hidden", backgroundColor: "#1f3a2e" },
-  play: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, alignItems: "center", justifyContent: "center" },
+  card: { aspectRatio: 9 / 16, borderRadius: 22, overflow: "hidden", backgroundColor: "#1f3a2e" },
+  playWrap: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, alignItems: "center", justifyContent: "center" },
+  playCircle: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   typeChip: {
     position: "absolute",
     top: 14,
