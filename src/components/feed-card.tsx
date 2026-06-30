@@ -1,5 +1,6 @@
 import { ImageBackground, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useRouter } from "expo-router";
 import { FEED_TYPE_META, type FeedEntry } from "@/lib/types";
@@ -35,7 +36,7 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
           <Text style={styles.emoji}>{meta.emoji}</Text>
           <Text style={styles.typeText}>{meta.label}</Text>
         </View>
-        <View style={styles.scrim}>
+        <LinearGradient colors={["transparent", "rgba(15,28,22,0.92)"]} style={styles.scrim}>
           <Text style={styles.title}>{entry.title}</Text>
           {entry.caption ? <Text style={styles.caption}>{entry.caption}</Text> : null}
           {entry.challengeId ? (
@@ -44,7 +45,7 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
               <Ionicons name="arrow-forward" size={15} color="#1f3a2e" />
             </View>
           ) : null}
-        </View>
+        </LinearGradient>
       </Pressable>
     );
   }
@@ -58,13 +59,13 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
       ) : (
         <SceneBackground seed={entry.id} scene={entry.scene} />
       )}
-      <View style={styles.topScrim} />
+      <LinearGradient colors={["rgba(20,20,40,0.45)", "transparent"]} style={styles.topScrim} />
       {entry.badge ? (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{entry.badge}</Text>
         </View>
       ) : null}
-      <View style={styles.annScrim}>
+      <LinearGradient colors={["transparent", "rgba(18,18,36,0.92)"]} style={styles.annScrim}>
         <Text style={styles.title}>{entry.title}</Text>
         {entry.caption ? <Text style={styles.caption}>{entry.caption}</Text> : null}
         {entry.actionLabel ? (
@@ -73,7 +74,7 @@ export default function FeedCard({ entry, lead = false }: { entry: FeedEntry; le
             <Ionicons name="arrow-forward" size={15} color="#1f3a2e" />
           </View>
         ) : null}
-      </View>
+      </LinearGradient>
     </Pressable>
   );
 }
@@ -101,9 +102,8 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: 18,
-    paddingTop: 48,
+    paddingTop: 72,
     paddingBottom: 18,
-    backgroundColor: "rgba(15,28,22,0.55)",
   },
   title: { fontSize: 21, fontWeight: "700", color: "#fff" },
   caption: { fontSize: 13.5, color: "rgba(255,255,255,0.82)", marginTop: 5, lineHeight: 19 },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
 
   // Announcement
   annCard: { height: 286, borderRadius: 22, overflow: "hidden", backgroundColor: "#34405C" },
-  topScrim: { position: "absolute", top: 0, left: 0, right: 0, height: 80, backgroundColor: "rgba(20,20,40,0.34)" },
+  topScrim: { position: "absolute", top: 0, left: 0, right: 0, height: 90 },
   badge: {
     position: "absolute",
     top: 14,
@@ -139,8 +139,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingHorizontal: 18,
-    paddingTop: 46,
+    paddingTop: 64,
     paddingBottom: 18,
-    backgroundColor: "rgba(18,18,36,0.82)",
   },
 });
